@@ -404,6 +404,14 @@ tr:nth-child(even) { background: rgba(255,255,255,.02); }
   <a href="#ch7" class="h2">第七章 · SQF 命令速查</a>
   <a href="#ch7-search" class="h3">搜索与标签页</a>
   <a href="#ch7-demo" class="h3">使用示例</a>
+  <a href="#ch8" class="h2">第八章 · Eden 编辑器深入指南</a>
+  <a href="#ch8-1" class="h3">界面总览与布局</a>
+  <a href="#ch8-2" class="h3">场景搭建</a>
+  <a href="#ch8-3" class="h3">触发器系统详解</a>
+  <a href="#ch8-4" class="h3">模块系统</a>
+  <a href="#ch8-5" class="h3">标记与Intel</a>
+  <a href="#ch8-6" class="h3">调试控制台与实时预览</a>
+  <a href="#ch8-7" class="h3">任务发布与导出</a>
   <a href="#appendix" class="h2">附录</a>
   <a href="#ap-a" class="h3">A. 快捷键速查</a>
   <a href="#ap-b" class="h3">B. Class Name 速查</a>
@@ -956,6 +964,345 @@ enemyCount = <span class="num">12</span>;</code></pre>
 <div class="cmd-grid" id="cmd-results"></div>
 
 </section>
+
+<!-- ==================== 第八章 ==================== -->
+<h2 id="ch8">第八章 · Eden 编辑器深入指南</h2>
+
+<p>3DEN（又称 Eden 编辑器）是 Arma 3 内置的全面任务编辑工具。第一章仅介绍了基础操作，本章将系统讲解编辑器的各项功能，帮助你从"能放单位"进阶到"能做任务"。</p>
+
+<h3 id="ch8-1">界面总览与布局</h3>
+
+<p>打开编辑器后，界面由以下区域组成：</p>
+
+<table>
+  <tr><th>区域</th><th>位置</th><th>功能</th></tr>
+  <tr><td>顶部工具栏</td><td>屏幕顶部</td><td>模式切换（编辑/试玩/Intel）、保存/加载、导出、设置</td></tr>
+  <tr><td>资产浏览器</td><td>左侧面板</td><td>按分类浏览可放置的单位、载具、物体、系统、模块</td></tr>
+  <tr><td>3D 视口</td><td>中央主区域</td><td>地图3D预览，所有实体的放置和编辑在此完成</td></tr>
+  <tr><td>属性面板</td><td>右侧面板</td><td>选中实体后显示其全部属性（位置、阵营、脚本等）</td></tr>
+  <tr><td>底部控制条</td><td>屏幕底部</td><td>时间与天气控制、场景日期设置</td></tr>
+</table>
+
+<p><strong>3D 视口导航操作：</strong></p>
+<ul>
+  <li><strong>W/A/S/D</strong>：前后左右移动视角</li>
+  <li><strong>Q/Z</strong>：上升/下降视角高度</li>
+  <li><strong>鼠标滚轮</strong>：缩放（拉近/拉远）</li>
+  <li><strong>鼠标中键拖动</strong>：平移视角</li>
+  <li><strong>Alt + 鼠标移动</strong>：环绕旋转视角</li>
+  <li><strong>Shift + 移动</strong>：加速移动</li>
+  <li><strong>N</strong>：切换视口模式（3D/2D地图/卫星图）</li>
+</ul>
+
+<div class="tip">按 <code>N</code> 可在3D视图、2D地图、卫星地图之间切换。2D模式下更方便精确定位，卫星图有助于识别地形特征。</div>
+
+<p><strong>资产浏览器分类说明：</strong></p>
+<table>
+  <tr><th>分类</th><th>内容</th><th>图标色</th></tr>
+  <tr><td>单位（Units）</td><td>步兵、狙击手、飞行员、潜水员等人员</td><td>蓝色</td></tr>
+  <tr><td>载具（Vehicles）</td><td>汽车、坦克、直升机、飞机、船只</td><td>蓝色</td></tr>
+  <tr><td>物体（Objects）</td><td>建筑、路障、武器箱、旗帜、灯光</td><td>绿色</td></tr>
+  <tr><td>系统（Systems）</td><td>模块、逻辑实体、游戏控制器</td><td>紫色</td></tr>
+</table>
+
+<h3 id="ch8-2">场景搭建——放置与编辑实体</h3>
+
+<h4>放置实体</h4>
+<ul>
+  <li><strong>双击地图/地形</strong>：弹出实体选择菜单，选择类型后放置</li>
+  <li><strong>从资产浏览器拖放</strong>：直接将资产拖入3D视口</li>
+  <li>放置后，实体显示为3D图标，选中后可拖动位置</li>
+</ul>
+
+<h4>实体属性详解</h4>
+<p>选中实体后，右侧属性面板显示以下关键设置：</p>
+
+<table>
+  <tr><th>属性</th><th>说明</th><th>脚本关联</th></tr>
+  <tr><td>Variable Name</td><td>实体的全局变量名，脚本中直接引用</td><td><code>unit1 setDamage 0.5</code></td></tr>
+  <tr><td>Init</td><td>初始化代码，任务开始时执行一次</td><td>写入任意SQF代码</td></tr>
+  <tr><td>Side（阵营）</td><td>BLUFOR / OPFOR / Independent / Civilian</td><td><code>side unit1 == west</code></td></tr>
+  <tr><td>Skill（技能）</td><td>0~1，影响AI精度与反应速度</td><td><code>unit1 setSkill 0.7</code></td></tr>
+  <tr><td>Health / Armor</td><td>初始血量/装甲值</td><td><code>unit1 setDamage 0.3</code></td></tr>
+  <tr><td>Rank（军衔）</td><td>Private~Colonel，影响AI指挥链</td><td><code>rank unit1</code></td></tr>
+  <tr><td>Control</td><td>Playable / Player，控制方式</td><td>决定多人中的玩家位</td></tr>
+  <tr><td>Position</td><td>X/Y/Z 坐标与朝向角度</td><td><code>getPos unit1</code></td></tr>
+</table>
+
+<h4>编辑操作</h4>
+<table>
+  <tr><th>操作</th><th>快捷键</th><th>说明</th></tr>
+  <tr><td>复制实体</td><td><code>Ctrl + D</code></td><td>原地复制，需手动偏移避免重叠</td></tr>
+  <tr><td>删除实体</td><td><code>Delete</code></td><td>删除选中实体</td></tr>
+  <tr><td>撤销</td><td><code>Ctrl + Z</code></td><td>可多次撤销</td></tr>
+  <tr><td>重做</td><td><code>Ctrl + Y</code></td><td>恢复撤销的操作</td></tr>
+  <tr><td>调整高度</td><td><code>PgUp / PgDn</code></td><td>升高/降低实体（放置在建筑上层时必用）</td></tr>
+  <tr><td>旋转</td><td><code>Shift + 滚轮</code></td><td>旋转实体朝向</td></tr>
+  <tr><td>精确定位</td><td><code>Shift + 拖动</code></td><td>小幅度精确移动</td></tr>
+  <tr><td>全选同类</td><td>—</td><td>右键→Select Similar</td></tr>
+</table>
+
+<h4>编组与航点</h4>
+<ul>
+  <li><strong>编组</strong>：选中多个单位 → <code>F2</code> 进入编组模式 → 拖线连接 → 单位共享一个组长（Leader），AI 自动跟随</li>
+  <li><strong>航点（Waypoint）</strong>：按 <code>F4</code> 切换到航点模式 → 选中单位 → 右键地图添加航点</li>
+  <li>航点类型：Move / Sentry / Guard / Hold / Cycle / Destroy / Seek and Destroy / Get In / Load / Unload / Land / Scripted 等</li>
+  <li>航点属性：Timeout（超时等待）、Condition（条件表达式）、On Act（激活脚本）、Completion Radius（完成半径）</li>
+</ul>
+
+<div class="note">Waypoint 的 <strong>Cycle</strong> 类型可实现巡逻循环：将最后一个航点设为 Cycle 并指向第一个航点，AI 会无限循环巡逻。</div>
+
+<div class="warn">Variable Name 只能包含字母、数字和下划线，且不能以数字开头。命名建议：<code>myUnit</code>、<code>enemy_1</code>、<code>objTarget</code>，避免 <code>unit</code>、<code>leader</code> 等可能与引擎保留字冲突的名称。</div>
+
+<h3 id="ch8-3">触发器系统详解</h3>
+
+<p>触发器（Trigger）是编辑器中实现事件驱动的核心机制，相当于"当某个条件满足时，执行某段代码"。</p>
+
+<h4>创建与基本设置</h4>
+<ul>
+  <li>创建：按 <code>F3</code> 切换到触发器模式 → 双击地图放置</li>
+  <li>或：右键地图 → 新建触发器</li>
+</ul>
+
+<h4>触发器属性一览</h4>
+<table>
+  <tr><th>属性</th><th>说明</th><th>示例</th></tr>
+  <tr><td>Activation（激活方）</td><td>哪些阵营/组/单位可触发</td><td>BLUFOR / OPFOR / Any / Civilian</td></tr>
+  <tr><td>Activation Type</td><td>进入 / 离开 / 驻留</td><td>Present / Not Present / West Detected</td></tr>
+  <tr><td>Repeatable</td><td>是否可重复触发</td><td>勾选后每次满足条件都会执行</td></tr>
+  <tr><td>Server Only</td><td>仅在服务端触发（多人优化）</td><td>勾选避免每台客户端都触发</td></tr>
+  <tr><td>Condition</td><td>自定义激活条件表达式</td><td><code>this && alive unit1</code></td></tr>
+  <tr><td>On Activation</td><td>激活时执行的代码</td><td><code>"任务完成！" remoteExec ["hint"]</code></td></tr>
+  <tr><td>On Deactivation</td><td>条件不再满足时执行的代码</td><td><code>hint "敌人离开了区域"</code></td></tr>
+  <tr><td>Timeout</td><td>条件持续满足多久才触发（防抖）</td><td>Min/Mid/Max 秒数</td></tr>
+  <tr><td>Countdown</td><td>条件满足后延迟多久触发</td><td>Min/Mid/Max 秒数</td></tr>
+</table>
+
+<h4>触发器区域设置</h4>
+<ul>
+  <li><strong>形状</strong>：椭圆（Ellipse）或 矩形（Rectangle）</li>
+  <li><strong>尺寸</strong>：a（长轴/宽度）、b（短轴/高度），单位为米</li>
+  <li><strong>角度</strong>：旋转角度</li>
+  <li>选中触发器后，地图上显示虚线边界，可拖动角点调整大小</li>
+</ul>
+
+<h4>Condition 字段详解</h4>
+<p>默认值为 <code>this</code>，表示"激活方进入区域即为真"。可自定义组合条件：</p>
+<pre><code><span class="cmt">// 默认：激活方进入即触发</span>
+this
+
+<span class="cmt">// 激活方进入 且 unit1 仍活着</span>
+this <span class="op">&&</span> alive unit1
+
+<span class="cmt">// 激活方进入 且 任务状态为"进行中"</span>
+this <span class="op">&&</span> taskState task1 <span class="op">==</span> <span class="str">"ASSIGNED"</span>
+
+<span class="cmt">// 区域内 BLUFOR 人数大于 3</span>
+<span class="fn">count</span> (thisList <span class="fn">select</span> {side _x <span class="op">==</span> west}) <span class="op">></span> 3
+
+<span class="cmt">// 特定变量为真时触发</span>
+myFlag</code></pre>
+
+<h4>常用触发器模式</h4>
+
+<p><strong>① 区域进入检测：</strong></p>
+<pre><code><span class="cmt">// Activation: BLUFOR, Present</span>
+<span class="cmt">// On Act:</span>
+<span class="str">"友军已进入目标区域"</span> remoteExec [<span class="str">"hint"</span>];
+task1 <span class="fn">setTaskState</span> <span class="str">"SUCCEEDED"</span>;</code></pre>
+
+<p><strong>② 任务完成检测：</strong></p>
+<pre><code><span class="cmt">// Condition:</span>
+<span class="op">!</span> alive enemyCommander
+<span class="cmt">// On Act:</span>
+<span class="str">"指挥官已被击杀！"</span> remoteExec [<span class="str">"hint"</span>];
+task_kill <span class="fn">setTaskState</span> <span class="str">"SUCCEEDED"</span>;</code></pre>
+
+<p><strong>③ 定时触发：</strong></p>
+<pre><code><span class="cmt">// Condition:</span>
+time <span class="op">></span> 300  <span class="cmt">// 任务开始5分钟后触发</span>
+<span class="cmt">// On Act:</span>
+<span class="str">"增援部队已到达！"</span> remoteExec [<span class="str">"hint"</span>];
+[<span class="str">"B_Soldier_F"</span>, getPos spawnPoint, [], 5] <span class="fn">call</span> BIS_fnc_spawnGroup;</code></pre>
+
+<div class="tip"><code>thisList</code> 是触发器内置变量，存储当前在区域内的所有实体数组。可以用 <code>count thisList</code> 获取区域内实体数量，或 <code>thisList select {side _x == east}</code> 筛选特定阵营。</div>
+
+<h3 id="ch8-4">模块系统（Modules）</h3>
+
+<p>模块（Modules）是 Eden 编辑器提供的预置功能组件，无需写代码即可实现复杂效果。模块位于资产浏览器的<strong>系统（Systems）</strong>分类下。</p>
+
+<h4>使用方式</h4>
+<ul>
+  <li>从系统分类中拖放模块到地图上</li>
+  <li>双击模块设置属性</li>
+  <li>部分模块需要通过<strong>同步连接</strong>（F5 模式）关联到目标实体</li>
+</ul>
+
+<h4>常用模块速查</h4>
+
+<table>
+  <tr><th>模块</th><th>分类</th><th>功能</th><th>同步连接</th></tr>
+  <tr><td>Set Date</td><td>时间天气</td><td>设置场景日期与时间</td><td>否</td></tr>
+  <tr><td>Set Weather</td><td>时间天气</td><td>设置天气（云量/雨量/雾/风）</td><td>否</td></tr>
+  <tr><td>Spawn AI</td><td>AI 系统</td><td>在指定位置动态生成AI单位/编组</td><td>同步到逻辑实体</td></tr>
+  <tr><td>AI Sub-skills</td><td>AI 系统</td><td>精细控制AI子技能（瞄准/指挥/侦察等）</td><td>同步到单位</td></tr>
+  <tr><td>Post Process</td><td>视觉</td><td>后处理效果（模糊/色彩/灰度/边框）</td><td>否</td></tr>
+  <tr><td>Film Grain</td><td>视觉</td><td>胶片颗粒效果</td><td>否</td></tr>
+  <tr><td>End Mission</td><td>任务控制</td><td>触发任务成功结束</td><td>否（On Act 调用）</td></tr>
+  <tr><td>Fail Mission</td><td>任务控制</td><td>触发任务失败结束</td><td>否（On Act 调用）</td></tr>
+  <tr><td>Arsenal</td><td>装备</td><td>武器库，玩家可自定义装备</td><td>同步到武器箱或单位</td></tr>
+  <tr><td>Garage</td><td>装备</td><td>车库，玩家可自定义载具装备</td><td>同步到载具</td></tr>
+  <tr><td>Sector Control</td><td>多人模式</td><td>区域占领控制（多人占点）</td><td>同步到触发器</td></tr>
+  <tr><td>Seize</td><td>多人模式</td><td>区域攻防占点</td><td>同步到触发器</td></tr>
+  <tr><td>Minefield</td><td>战术</td><td>在区域自动布设地雷</td><td>否</td></tr>
+  <tr><td>Set Identity</td><td>外观</td><td>设置单位面部/语音/徽章</td><td>同步到单位</td></tr>
+  <tr><td>Tactical Ping</td><td>通信</td><td>战术标记，向队友标记位置</td><td>否</td></tr>
+  <tr><td>Speed Mode</td><td>AI 行为</td><td>限制AI移动速度</td><td>同步到单位/编组</td></tr>
+</table>
+
+<h4>模块同步连接</h4>
+<p>部分模块需要通过同步（Sync）连线关联目标：</p>
+<ul>
+  <li>按 <code>F5</code> 进入同步模式</li>
+  <li>从模块拖线到目标实体（单位/载具/触发器等）</li>
+  <li>连线成功后，模块将对同步目标生效</li>
+</ul>
+
+<div class="note">Spawn AI 模块是做大规模战斗场景的利器。可以设置生成数量、阵营、行为模式、动态增强（随时间增加敌人数量），无需手写一个 <code>spawn</code> 脚本。</div>
+
+<h3 id="ch8-5">标记与 Intel（情报）</h3>
+
+<h4>标记（Markers）</h4>
+<p>标记是地图上的视觉指示器，玩家可在地图（M键）上看到。</p>
+
+<ul>
+  <li><strong>创建</strong>：按 <code>F6</code> 切换到标记模式 → 双击地图放置</li>
+  <li><strong>图标标记</strong>：各类军事符号（箭头/圆圈/方形/旗帜等）</li>
+  <li><strong>文本标记</strong>：带文字说明的标记点</li>
+  <li><strong>区域标记</strong>：覆盖一块区域（椭圆/矩形），类似触发器区域</li>
+</ul>
+
+<table>
+  <tr><th>属性</th><th>说明</th><th>脚本关联</th></tr>
+  <tr><td>Text</td><td>标记显示的文字</td><td><code>"mkr1" setMarkerText "目标点"</code></td></tr>
+  <tr><td>Color</td><td>标记颜色（对应阵营色）</td><td><code>"mkr1" setMarkerColor "ColorRed"</code></td></tr>
+  <tr><td>Marker Type</td><td>图标类型（mil_dot / mil_flag / mil_objective 等）</td><td><code>"mkr1" setMarkerType "mil_flag"</code></td></tr>
+  <tr><td>Alpha</td><td>透明度 0~1</td><td><code>"mkr1" setMarkerAlpha 0.5</code></td></tr>
+  <tr><td>Size</td><td>图标缩放</td><td><code>"mkr1" setMarkerSize [1.5, 1.5]</code></td></tr>
+</table>
+
+<div class="tip">编辑器中放置的标记默认<strong>所有人可见</strong>。如需动态创建/隐藏标记，使用脚本：<code>createMarker</code> / <code>deleteMarker</code> / <code>setMarkerAlpha</code>。</div>
+
+<h4>Intel 面板</h4>
+<p>Intel（情报）面板用于设置任务的全局信息：</p>
+<ul>
+  <li>打开方式：顶部菜单 → <strong>Scenario → Intel</strong>（场景→情报）</li>
+</ul>
+
+<table>
+  <tr><th>设置项</th><th>说明</th></tr>
+  <tr><td>Title</td><td>任务标题（任务列表中显示的名称）</td></tr>
+  <tr><td>Overview Text</td><td>任务简介（任务选择界面显示的概述）</td></tr>
+  <tr><td>Overview Picture</td><td>加载画面图片路径</td></tr>
+  <tr><td>Date / Time</td><td>场景初始日期与时间</td></tr>
+  <tr><td>Weather</td><td>初始天气（云量/雨/雾/风/浪）</td></tr>
+  <tr><td>Resistance</td><td>独立阵营对谁友好</td></tr>
+</ul>
+
+<div class="warn">Intel 中的天气/时间设置会被 <code>description.ext</code> 或脚本覆盖。如果脚本中有 <code>setDate</code> 或 <code>setWeather</code>，以脚本为准。</div>
+
+<h3 id="ch8-6">调试控制台与实时预览</h3>
+
+<h4>预览模式</h4>
+<ul>
+  <li><strong>快捷预览</strong>：<code>Ctrl + Shift + F10</code>，快速进入单人预览</li>
+  <li><strong>菜单预览</strong>：顶部工具栏 → Play → 选择 SP/MP 预览</li>
+  <li><strong>多人预览</strong>：Play → Multiplayer，可模拟多人环境</li>
+</ul>
+
+<h4>Debug Console（调试控制台）</h4>
+<p>游戏中按 <code>Esc</code> → 点击左下角 <strong>"Debug Console"</strong> 打开。</p>
+
+<table>
+  <tr><th>执行按钮</th><th>作用域</th><th>适用场景</th></tr>
+  <tr><td>LOCAL EXEC</td><td>仅在本地客户端执行</td><td>测试UI、显示效果</td></tr>
+  <tr><td>SERVER EXEC</td><td>仅在服务端执行</td><td>测试全局逻辑、AI控制</td></tr>
+  <tr><td>GLOBAL EXEC</td><td>所有客户端+服务端都执行</td><td>广播消息、全局效果</td></tr>
+</table>
+
+<h4>Watch 表达式</h4>
+<p>Debug Console 中有 <strong>Watch</strong> 区域，可输入表达式实时监控变量值：</p>
+<pre><code><span class="cmt">// 在 Watch 框输入以下表达式，每次切回控制台都会显示当前值</span>
+alive unit1          <span class="cmt">// 返回 true/false</span>
+getPos player        <span class="cmt">// 返回 [x, y, z]</span>
+damage heli1         <span class="cmt">// 返回 0~1 伤害值</span>
+count units group1   <span class="cmt">// 返回编组存活人数</span>
+taskState task1      <span class="cmt">// 返回任务状态字符串</span></code></pre>
+
+<h4>开发工作流</h4>
+<ol>
+  <li>在编辑器中搭建场景、放置单位</li>
+  <li><code>Ctrl + Shift + F10</code> 快速预览</li>
+  <li>按 <code>Esc</code> 打开 Debug Console 测试代码</li>
+  <li><code>Alt + Tab</code> 切出 → 修改脚本文件</li>
+  <li>回到游戏 → 再次预览（修改 .sqf 文件后需重新预览才生效）</li>
+</ol>
+
+<div class="tip">Debug Console 的执行权限可在 <code>description.ext</code> 中控制：<code>enableDebugConsole = 1;</code>（仅主机）、<code>= 2;</code>（所有管理员）、<code>= 2;</code>（所有人，仅开发时使用）。正式发布时务必设为 <code>0</code> 或 <code>1</code>。</div>
+
+<h3 id="ch8-7">任务发布与导出</h3>
+
+<h4>导出流程</h4>
+
+<table>
+  <tr><th>步骤</th><th>操作</th><th>输出</th></tr>
+  <tr><td>1. 单人任务导出</td><td>菜单 → Export → Export to Singleplayer</td><td>保存到 <code>Documents\Arma 3\missions\</code></td></tr>
+  <tr><td>2. 多人任务导出</td><td>菜单 → Export → Export to Multiplayer</td><td>保存到 <code>Documents\Arma 3\MPMissions\</code></td></tr>
+  <tr><td>3. PBO 打包</td><td>Arma 3 Tools → Addon Builder，或使用 PBO Manager</td><td>.pbo 文件</td></tr>
+  <tr><td>4. 创意工坊发布</td><td>Arma 3 Launcher → Publish → 选择 .pbo</td><td>Steam Workshop</td></tr>
+</table>
+
+<h4>description.ext 关键配置</h4>
+<p>发布前务必配置 <code>description.ext</code>，这是任务的"配置文件"：</p>
+<pre><code><span class="cmt">// description.ext 基础配置示例</span>
+
+<span class="fn">author</span> = <span class="str">"你的名字"</span>;                  <span class="cmt">// 作者名</span>
+<span class="fn">onLoadName</span> = <span class="str">"我的第一个任务"</span>;          <span class="cmt">// 加载界面标题</span>
+<span class="fn">onLoadMission</span> = <span class="str">"深入敌后…"</span>;          <span class="cmt">// 加载界面描述</span>
+<span class="fn">loadScreen</span> = <span class="str">"loadscreen.paa"</span>;         <span class="cmt">// 加载画面图片</span>
+
+<span class="cmt">// 复活设置</span>
+<span class="fn">respawn</span> = <span class="num">3</span>;                           <span class="cmt">// 3 = 基地复活, 1 = 原地复活</span>
+<span class="fn">respawnDelay</span> = <span class="num">5</span>;                       <span class="cmt">// 复活倒计时（秒）</span>
+<span class="fn">respawnOnStart</span> = <span class="num">-1</span>;                    <span class="cmt">// -1 = 不在开始时复活</span>
+
+<span class="cmt">// 调试控制台权限</span>
+<span class="fn">enableDebugConsole</span> = <span class="num">1</span>;                 <span class="cmt">// 0=关闭, 1=仅主机, 2=所有人</span>
+
+<span class="cmt">// 角色选择</span>
+<span class="fn">disabledAI</span> = <span class="num">1</span>;                         <span class="cmt">// 1 = 禁用空位AI代打</span>
+
+<span class="cmt">// 简报（也可用 briefing.sqf 动态生成）</span>
+<span class="kw">class</span> Header
+{
+    <span class="fn">gameType</span> = <span class="str">"COOP"</span>;     <span class="cmt">// COOP/DM/TDM/CTF/SC</span>
+    <span class="fn">minPlayers</span> = <span class="num">1</span>;
+    <span class="fn">maxPlayers</span> = <span class="num">12</span>;
+};</code></pre>
+
+<h4>发布检查清单</h4>
+<ul>
+  <li>✅ 所有 Variable Name 拼写正确，脚本引用无误</li>
+  <li>✅ <code>description.ext</code> 配置完整（复活/角色/调试控制台权限）</li>
+  <li>✅ 多人任务中关键代码使用 <code>remoteExec</code> / <code>isServer</code> / <code>isDedicated</code> 做服务端判断</li>
+  <li>✅ 任务有 Intel 标题和概述</li>
+  <li>✅ 无 Debug Console 残留测试代码</li>
+  <li>✅ <code>enableDebugConsole</code> 设为 0 或 1（不要留 2）</li>
+  <li>✅ 多人测试无 JIP（Join In Progress）问题</li>
+  <li>✅ 所有 .sqf 文件编码为 <strong>UTF-8 without BOM</strong></li>
+</ul>
+
+<div class="warn">多人任务中，<code>init.sqf</code> 在每台客户端和服务端都会执行一次。需要全局执行的代码（如创建任务）务必用 <code>if (isServer) then {...}</code> 包裹，避免重复执行。</div>
 
 <!-- ==================== 附录 ==================== -->
 <h2 id="appendix">附录</h2>
