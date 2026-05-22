@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>武装突袭3 脚本开发从零到入门</title>
+<style>
+:root {
+  --bg: #1a1d23;
+  --panel: #21252b;
+  --text: #c8ccd4;
+  --heading: #e5c07b;
+  --accent: #528bff;
+  --code-bg: #282c34;
+  --border: #3a3f4b;
+  --highlight: #98c379;
+  --warning: #d19a66;
+  --danger: #e06c75;
+  --info: #56b6c2;
+  --sidebar-w: 260px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+nav#toc {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  height: 100vh;
+  position: fixed;
+  top: 0; left: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 24px 20px;
+  z-index: 100;
+}
+nav#toc h2 {
+  font-size: 16px;
+  color: var(--heading);
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 8px;
+}
+nav#toc a {
+  display: block;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 4px 0 4px 8px;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+}
+nav#toc a:hover, nav#toc a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+nav#toc a.h2 { padding-left: 8px; font-weight: 600; margin-top: 6px; }
+nav#toc a.h3 { padding-left: 20px; font-size: 12px; color: #999; }
+
+/* Main */
+main {
+  margin-left: var(--sidebar-w);
+  padding: 40px 48px;
+  max-width: 900px;
+  width: 100%;
+}
+
+h1 {
+  font-size: 2rem;
+  color: var(--heading);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+h1 small {
+  display: block;
+  font-size: .5em;
+  color: #666;
+  margin-top: 4px;
+  letter-spacing: 0;
+}
+h2 {
+  font-size: 1.4rem;
+  color: var(--heading);
+  margin: 40px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+h3 {
+  font-size: 1.15rem;
+  color: var(--info);
+  margin: 28px 0 12px;
+}
+h4 { font-size: 1rem; color: var(--warning); margin: 20px 0 10px; }
+
+p { margin-bottom: 12px; }
+ul, ol { margin: 8px 0 16px 24px; }
+li { margin-bottom: 4px; }
+
+/* Code */
+code {
+  font-family: "Cascadia Code", "Fira Code", "JetBrains Mono", "Consolas", monospace;
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: .88em;
+  color: var(--highlight);
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  margin: 12px 0 20px;
+  font-size: .85em;
+  line-height: 1.6;
+}
+pre code {
+  background: none;
+  padding: 0;
+  color: #abb2bf;
+}
+
+/* Highlighting */
+.kw { color: #c678dd; font-weight: bold; }
+.str { color: #98c379; }
+.cmt { color: #5c6370; font-style: italic; }
+.fn { color: #61afef; }
+.num { color: #d19a66; }
+.op { color: #56b6c2; }
+
+/* Tips / Warning boxes */
+.tip, .warn, .note {
+  border-left: 4px solid var(--info);
+  background: rgba(86,182,194,.08);
+  padding: 12px 16px;
+  margin: 16px 0;
+  border-radius: 0 6px 6px 0;
+}
+.tip::before { content: "💡 小贴士："; color: var(--info); font-weight: bold; }
+.warn { border-left-color: var(--danger); background: rgba(224,108,117,.08); }
+.warn::before { content: "⚠️ 注意："; color: var(--danger); font-weight: bold; }
+.note { border-left-color: var(--warning); background: rgba(209,154,102,.08); }
+.note::before { content: "📝 重点："; color: var(--warning); font-weight: bold; }
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: .92em;
+}
+th, td {
+  padding: 8px 14px;
+  text-align: left;
+  border: 1px solid var(--border);
+}
+th {
+  background: var(--code-bg);
+  color: var(--heading);
+  font-weight: 600;
+}
+tr:nth-child(even) { background: rgba(255,255,255,.02); }
+
+/* Step number */
+.step { display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%; background: var(--accent);
+  color: #fff; font-size: 12px; font-weight: bold; margin-right: 8px; }
+
+/* Print */
+@media print {
+  nav#toc { display: none; }
+  main { margin-left: 0; padding: 20px; }
+  body { color: #000; background: #fff; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  nav#toc { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--border); }
+  main { margin-left: 0; padding: 20px; }
+  body { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<nav id="toc">
+  <h2>📖 目录导航</h2>
+  <a href="#preface" class="h2">前言</a>
+  <a href="#ch1" class="h2">第一章 · 准备工作</a>
+  <a href="#ch1-1" class="h3">Arma 3 Tools 安装</a>
+  <a href="#ch1-2" class="h3">代码编辑器</a>
+  <a href="#ch1-3" class="h3">3DEN 编辑器入门</a>
+  <a href="#ch1-4" class="h3">认识文件结构</a>
+  <a href="#ch1-5" class="h3">PBO 文件解析</a>
+  <a href="#ch2" class="h2">第二章 · SQF 语言入门</a>
+  <a href="#ch2-1" class="h3">第一个脚本</a>
+  <a href="#ch2-2" class="h3">注释</a>
+  <a href="#ch2-3" class="h3">变量</a>
+  <a href="#ch2-4" class="h3">数据类型</a>
+  <a href="#ch2-5" class="h3">运算符</a>
+  <a href="#ch2-6" class="h3">条件判断</a>
+  <a href="#ch2-7" class="h3">循环</a>
+  <a href="#ch2-8" class="h3">函数</a>
+  <a href="#ch3" class="h2">第三章 · 常用命令速查</a>
+  <a href="#ch3-1" class="h3">单位操作</a>
+  <a href="#ch3-2" class="h3">任务系统</a>
+  <a href="#ch3-3" class="h3">触发与提示</a>
+  <a href="#ch3-4" class="h3">标记与音效</a>
+  <a href="#ch4" class="h2">第四章 · 实战案例</a>
+  <a href="#ch4-1" class="h3">入门消息提示</a>
+  <a href="#ch4-2" class="h3">区域触发剧情</a>
+  <a href="#ch4-3" class="h3">杀敌完成任务</a>
+  <a href="#ch4-4" class="h3">随机巡逻队</a>
+  <a href="#ch4-5" class="h3">复活系统</a>
+  <a href="#ch4-6" class="h3">动态天气时间</a>
+  <a href="#ch5" class="h2">第五章 · 调试与排错</a>
+  <a href="#ch5-1" class="h3">调试工具</a>
+  <a href="#ch5-2" class="h3">常见报错</a>
+  <a href="#ch5-3" class="h3">启动参数</a>
+  <a href="#ch5-4" class="h3">官方Wiki</a>
+  <a href="#ch5-5" class="h3">多人联机调试</a>
+  <a href="#ch6" class="h2">第六章 · 进阶学习路径</a>
+  <a href="#ch6-1" class="h3">事件处理器</a>
+  <a href="#ch6-2" class="h3">多人联机要点</a>
+  <a href="#ch6-3" class="h3">学习资源</a>
+  <a href="#ch6-4" class="h3">模组源码推荐</a>
+  <a href="#appendix" class="h2">附录</a>
+  <a href="#ap-a" class="h3">A. 快捷键速查</a>
+  <a href="#ap-b" class="h3">B. Class Name 速查</a>
+  <a href="#ap-c" class="h3">C. 常见问题 FAQ</a>
+</nav>
+
+<main>
+
+<h1>武装突袭3 脚本开发从零到入门<small>面向零编程基础玩家的 SQF 脚本学习手册</small></h1>
+
+<!-- ==================== 前言 ==================== -->
+<h2 id="preface">前言：为什么学 Arma 3 脚本？</h2>
+
+<h3>脚本能做什么？</h3>
+<p>Arma 3 内置了一套强大的脚本引擎，学会写脚本后，你可以——</p>
+<ul>
+  <li><strong>自制任务</strong>：设计属于自己的剧情任务，控制 AI 行为、触发事件、管理任务目标</li>
+  <li><strong>修改游戏玩法</strong>：自定义复活系统、装备发放、载具刷新等核心机制</li>
+  <li><strong>创建动态战场</strong>：随机生成巡逻队、动态天气、随时间变化的战场局势</li>
+  <li><strong>开发模组</strong>：从简单的脚本模组到完整的游戏改造 Mod</li>
+</ul>
+
+<h3>学脚本需要什么基础？</h3>
+<div class="tip">只要你会用电脑、玩过 Arma 3，零代码基础完全 OK！本手册会从最基础的概念讲起，不预设任何编程经验。</div>
+<p>你只需要：一台能跑 Arma 3 的电脑、Steam 上的 Arma 3 本体，以及一颗愿意尝试的心。</p>
+
+<h3>学习路线图</h3>
+<table>
+  <tr><th>阶段</th><th>内容</th><th>预计时间</th></tr>
+  <tr><td>第一章</td><td>搭建开发环境，认识工具和文件结构</td><td>30 分钟</td></tr>
+  <tr><td>第二章</td><td>学习 SQF 语言基础语法</td><td>2-3 小时</td></tr>
+  <tr><td>第三章</td><td>掌握常用命令，理解功能模块</td><td>2 小时</td></tr>
+  <tr><td>第四章</td><td>跟做 6 个实战案例，从写到跑</td><td>3-4 小时</td></tr>
+  <tr><td>第五章</td><td>学会调试报错，独立解决问题</td><td>随时查阅</td></tr>
+  <tr><td>第六章</td><td>进阶知识，通往模组开发之路</td><td>持续学习</td></tr>
+</table>
+
+<!-- ==================== 第一章 ==================== -->
+<h2 id="ch1">第一章 · 准备工作（环境搭建）</h2>
+
+<h3 id="ch1-1"><span class="step">1</span> Arma 3 Tools 安装</h3>
+<p>Arma 3 Tools 是官方提供的开发工具包，包含 Addon Builder（打包工具）等必备组件：</p>
+<ol>
+  <li>打开 Steam 客户端</li>
+  <li>点击顶部菜单「库」→ 将筛选器从"游戏"切换为「工具」</li>
+  <li>在列表中找到 <strong>Arma 3 Tools</strong>，右键 → 安装</li>
+  <li>等待下载完成即可</li>
+</ol>
+<div class="note">如果你只写脚本、不做模组发布，前期可以不装 Arma 3 Tools。但后续打包 PBO 时一定会用到，建议提前装好。</div>
+
+<h3 id="ch1-2"><span class="step">2</span> 推荐的代码编辑器</h3>
+<p><strong>强烈推荐 Visual Studio Code</strong>（免费、轻量、插件丰富）：</p>
+<ol>
+  <li>前往 <code>code.visualstudio.com</code> 下载安装</li>
+  <li>打开 VS Code，点击左侧扩展图标（或按 <code>Ctrl+Shift+X</code>）</li>
+  <li>搜索并安装以下插件：<strong>SQF Language</strong>（语法高亮 + 自动补全）</li>
+</ol>
+<p>装好插件后，你写的 <code>.sqf</code> 文件就会有语法高亮和智能提示，大大降低手滑写错的概率。</p>
+<div class="tip">其他可选编辑器：Notepad++（装 SQF 高亮插件）、Sublime Text。但 VS Code 是目前社区的主流选择。</div>
+
+<h3 id="ch1-3"><span class="step">3</span> 3DEN 编辑器基础</h3>
+<p><strong>3DEN</strong> 是 Arma 3 内置的任务编辑器，你可以用它摆放单位、设置触发器、关联脚本。</p>
+<p>打开方式：游戏主菜单 → 「编辑器」→ 选择地图 → 新建。</p>
+<p>基本操作：</p>
+<ul>
+  <li><strong>双击地图</strong>：放置单位/物体</li>
+  <li><strong>右键 → 触发器（Trigger）</strong>：创建触发区域</li>
+  <li><strong>右键 → 标记点（Marker）</strong>：放置地图标记</li>
+  <li>选中物体后，在右侧面板可以设置名称（Variable Name）、初始化代码（Init）等</li>
+</ul>
+<div class="warn">在编辑器中给单位/触发器起的 Variable Name，就是在脚本中引用它的变量名。一定要起一个有意义、好记的名字！</div>
+
+<h3 id="ch1-4"><span class="step">4</span> 认识文件结构</h3>
+<p>一个典型的 Arma 3 任务文件夹（保存在 <code>我的文档\Arma 3\missions\</code> 或 <code>MPMissions\</code>）包含以下核心文件：</p>
+<table>
+  <tr><th>文件名</th><th>作用</th><th>必需？</th></tr>
+  <tr><td><code>mission.sqm</code></td><td>任务主文件，存储地图上所有物体、触发器、标记的位置和属性（3DEN 编辑器自动生成）</td><td>✅ 是</td></tr>
+  <tr><td><code>init.sqf</code></td><td>任务初始化脚本，任务开始时会自动执行（脚本开发的"入口文件"）</td><td>❌ 建议有</td></tr>
+  <tr><td><code>initPlayerLocal.sqf</code></td><td>每个玩家进入游戏时执行一次（多人联机常用）</td><td>❌ 多人推荐</td></tr>
+  <tr><td><code>description.ext</code></td><td>任务配置文件：复活设置、重生装备、天气、加载画面等</td><td>❌ 建议有</td></tr>
+  <tr><td><code>onPlayerRespawn.sqf</code></td><td>玩家复活时执行（需要 description.ext 中开启复活）</td><td>❌ 按需</td></tr>
+</table>
+<div class="note"><strong>最关键的文件是 init.sqf</strong>——它就像"任务的入口"，大部分脚本逻辑都从这里开始。</div>
+
+<h3 id="ch1-5"><span class="step">5</span> PBO 文件是什么？</h3>
+<p><strong>PBO</strong>（Packed Bohemia Object）是 Arma 系列的标准打包格式，类似 ZIP 压缩包。任务文件夹打包成 PBO 后才能发布到创意工坊或在多人服务器上使用。</p>
+<p>打包方式：</p>
+<ul>
+  <li><strong>Arma 3 Tools → Addon Builder</strong>：右键任务文件夹 → 打包</li>
+  <li><strong>第三方工具</strong>：PBO Manager（更简单直观，社区推荐）</li>
+</ul>
+<div class="tip">学习阶段不需要打包！直接在编辑器中「预览」（Play）就能测试脚本。只有发布时才需要 PBO。</div>
+
+<!-- ==================== 第二章 ==================== -->
+<h2 id="ch2">第二章 · SQF 脚本语言入门</h2>
+
+<h3 id="ch2-1">SQF 是什么？</h3>
+<p><strong>SQF</strong>（Status Quo Function）是 Arma 系列的脚本语言，语法类似 C 语言家族。你写的每一个脚本文件都以 <code>.sqf</code> 为后缀。</p>
+
+<h3>第一个脚本：Hello Arma！</h3>
+<p>创建一个文件 <code>init.sqf</code>，写入以下内容：</p>
+<pre><code><span class="cmt">// 这是我的第一个脚本！</span>
+<span class="fn">systemChat</span> <span class="str">"Hello Arma! 脚本世界我来了！"</span>;
+<span class="fn">hint</span> <span class="str">"欢迎来到武装突袭3脚本开发！"</span>;</pre></code>
+<p>把这个文件放到任务文件夹里，进入游戏就能看到左下角聊天区出现提示文字，屏幕中央弹出 Hint 提示框。</p>
+
+<h3 id="ch2-2">注释怎么写？</h3>
+<p>注释是写给人类看的说明文字，游戏引擎会忽略它们。养成写注释的好习惯！</p>
+<pre><code><span class="cmt">// 这是单行注释，从双斜杠到行尾都是注释</span>
+
+<span class="cmt">/*
+   这是多行注释
+   可以写很多行
+   适合写大段说明
+*/</span></code></pre>
+
+<h3 id="ch2-3">变量：存储数据的容器</h3>
+<p>变量就像一个带标签的盒子，你可以把数据放进去、随时取出来用。</p>
+
+<h4>局部变量（下划线开头）</h4>
+<pre><code><span class="kw">private</span> <span class="fn">_myNumber</span> = <span class="num">42</span>;              <span class="cmt">// 只在当前脚本块内有效</span>
+<span class="kw">private</span> <span class="fn">_playerName</span> = <span class="fn">name</span> <span class="fn">player</span>;    <span class="cmt">// 获取玩家名字</span></code></pre>
+
+<h4>全局变量（无下划线，整个任务都能访问）</h4>
+<pre><code>missionDone = <span class="kw">false</span>;                    <span class="cmt">// 所有脚本都能读写</span>
+enemyCount = <span class="num">12</span>;</code></pre>
+
+<h4>特殊变量 _this</h4>
+<p><code>_this</code> 是 SQF 中最重要的特殊变量。当脚本被调用时自动传入，代表"调用者传给脚本的东西"。</p>
+<pre><code><span class="cmt">// 在单位的 Init 框中写：</span>
+<span class="cmt">// [player, 100] execVM "giveMoney.sqf";</span>
+
+<span class="cmt">// giveMoney.sqf 中：</span>
+<span class="kw">params</span> [<span class="str">"_targetUnit"</span>, <span class="str">"_amount"</span>];
+<span class="fn">systemChat</span> <span class="fn">format</span> [<span class="str">"给 %1 发了 %2 块钱"</span>, <span class="fn">name</span> <span class="fn">_targetUnit</span>, <span class="fn">_amount</span>];</code></pre>
+
+<h3 id="ch2-4">数据类型</h3>
+<table>
+  <tr><th>类型</th><th>说明</th><th>示例</th></tr>
+  <tr><td>数字 (Number)</td><td>整数或小数</td><td><code>42</code>、<code>3.14</code>、<code>-5</code></td></tr>
+  <tr><td>字符串 (String)</td><td>文本，用双引号包起来</td><td><code>"Hello"</code>、<code>"张三"</code></td></tr>
+  <tr><td>布尔 (Boolean)</td><td>真或假</td><td><code>true</code>、<code>false</code></td></tr>
+  <tr><td>数组 (Array)</td><td>一组数据，用方括号</td><td><code>[1, 2, 3]</code>、<code>["红", "蓝"]</code></td></tr>
+  <tr><td>代码块 (Code)</td><td>一段待执行的代码，用花括号</td><td><code>{ hint "你好"; }</code></td></tr>
+  <tr><td>对象 (Object)</td><td>游戏中的单位、载具等</td><td><code>player</code>、<code>this</code></td></tr>
+  <tr><td>空值 (nil)</td><td>啥也没有</td><td><code>nil</code>、<code>objNull</code></td></tr>
+</table>
+
+<h3 id="ch2-5">运算符</h3>
+<table>
+  <tr><th>类别</th><th>符号</th><th>含义</th><th>示例</th></tr>
+  <tr><td rowspan="5">算术</td><td><code>+</code></td><td>加</td><td><code>3 + 4 → 7</code></td></tr>
+  <tr><td><code>-</code></td><td>减</td><td><code>10 - 3 → 7</code></td></tr>
+  <tr><td><code>*</code></td><td>乘</td><td><code>5 * 6 → 30</code></td></tr>
+  <tr><td><code>/</code></td><td>除</td><td><code>20 / 4 → 5</code></td></tr>
+  <tr><td><code>%</code></td><td>取余（模）</td><td><code>10 % 3 → 1</code></td></tr>
+  <tr><td rowspan="6">比较</td><td><code>==</code></td><td>等于</td><td><code>5 == 5 → true</code></td></tr>
+  <tr><td><code>!=</code></td><td>不等于</td><td><code>5 != 3 → true</code></td></tr>
+  <tr><td><code>&gt;</code></td><td>大于</td><td><code>8 &gt; 3 → true</code></td></tr>
+  <tr><td><code>&lt;</code></td><td>小于</td><td><code>2 &lt; 10 → true</code></td></tr>
+  <tr><td><code>&gt;=</code></td><td>大于等于</td><td></td></tr>
+  <tr><td><code>&lt;=</code></td><td>小于等于</td><td></td></tr>
+  <tr><td rowspan="3">逻辑</td><td><code>&amp;&amp;</code></td><td>并且（AND）</td><td>两个条件都满足</td></tr>
+  <tr><td><code>||</code></td><td>或者（OR）</td><td>任一条件满足</td></tr>
+  <tr><td><code>!</code></td><td>取反（NOT）</td><td><code>!true → false</code></td></tr>
+</table>
+
+<h3 id="ch2-6">条件判断 if...then...else</h3>
+<pre><code><span class="kw">private</span> <span class="fn">_hp</span> = <span class="fn">damage</span> <span class="fn">player</span>;
+
+<span class="kw">if</span> (<span class="fn">_hp</span> &gt; <span class="num">0.5</span>) <span class="kw">then</span> {
+    <span class="fn">hint</span> <span class="str">"你受了重伤！快找掩体！"</span>;
+} <span class="kw">else</span> {
+    <span class="fn">hint</span> <span class="str">"状态良好，继续前进！"</span>;
+};</code></pre>
+
+<div class="note">判断相等用 <code>==</code>（两个等号），不是 <code>=</code>（一个等号）。这是新手最常见的错误！</div>
+
+<h3 id="ch2-7">循环</h3>
+
+<h4>for 循环（知道要循环多少次）</h4>
+<pre><code><span class="cmt">// 在玩家周围生成5个靶子</span>
+<span class="kw">for</span> <span class="str">"_i"</span> <span class="kw">from</span> <span class="num">1</span> <span class="kw">to</span> <span class="num">5</span> <span class="kw">do</span> {
+    <span class="kw">private</span> <span class="fn">_pos</span> = <span class="fn">player</span> <span class="fn">getPos</span> [<span class="fn">random</span> <span class="num">30</span>, <span class="fn">random</span> <span class="num">360</span>];
+    <span class="str">"TargetP_Civ_F"</span> <span class="fn">createVehicle</span> <span class="fn">_pos</span>;
+    <span class="fn">systemChat</span> <span class="fn">format</span> [<span class="str">"已生成第 %1 个靶子"</span>, <span class="fn">_i</span>];
+};</code></pre>
+
+<h4>while 循环（条件满足就一直循环）</h4>
+<pre><code><span class="cmt">// 只要玩家还活着，每10秒报告一次位置</span>
+<span class="kw">while</span> {<span class="fn">alive</span> <span class="fn">player</span>} <span class="kw">do</span> {
+    <span class="fn">systemChat</span> <span class="fn">format</span> [<span class="str">"当前位置：%1"</span>, <span class="fn">getPos</span> <span class="fn">player</span>];
+    <span class="fn">sleep</span> <span class="num">10</span>;
+};</code></pre>
+
+<h4>forEach 循环（遍历数组中的每个元素）</h4>
+<pre><code><span class="kw">private</span> <span class="fn">_fruits</span> = [<span class="str">"苹果"</span>, <span class="str">"香蕉"</span>, <span class="str">"橘子"</span>];
+{
+    <span class="fn">systemChat</span> <span class="fn">format</span> [<span class="str">"我喜欢吃 %1"</span>, <span class="fn">_x</span>];
+} <span class="kw">forEach</span> <span class="fn">_fruits</span>;</code></pre>
+<div class="tip">在 forEach 循环中，<code>_x</code> 代表当前遍历到的元素，<code>_forEachIndex</code> 代表当前索引（第几个）。</div>
+
+<h3 id="ch2-8">函数定义与调用</h3>
+<p>把一段可以复用的代码打包成函数：</p>
+<pre><code><span class="cmt">// 定义一个函数：在指定位置生成烟雾</span>
+<span class="fn">my_fnc_createSmoke</span> = {
+    <span class="kw">params</span> [<span class="str">"_pos"</span>, <span class="str">"_color"</span>];
+    
+    <span class="kw">private</span> <span class="fn">_smoke</span> = <span class="str">"SmokeShell"</span> <span class="fn">createVehicle</span> <span class="fn">_pos</span>;
+    <span class="fn">systemChat</span> <span class="fn">format</span> [<span class="str">"在 %1 生成了一团 %2 烟雾"</span>, <span class="fn">_pos</span>, <span class="fn">_color</span>];
+};
+
+<span class="cmt">// 调用函数</span>
+[<span class="fn">getPos</span> <span class="fn">player</span>, <span class="str">"红色"</span>] <span class="kw">call</span> <span class="fn">my_fnc_createSmoke</span>;</code></pre>
+
+<!-- ==================== 第三章 ==================== -->
+<h2 id="ch3">第三章 · 常用命令速查</h2>
+
+<h3 id="ch3-1">单位操作</h3>
+<table>
+  <tr><th>命令</th><th>功能</th><th>示例</th></tr>
+  <tr><td><code>createUnit</code></td><td>创建一个 AI 单位</td><td>见下方详解</td></tr>
+  <tr><td><code>createVehicle</code></td><td>生成载具/物品</td><td><code>"B_MRAP_01_F" createVehicle getPos player</code></td></tr>
+  <tr><td><code>setPos</code></td><td>设置位置</td><td><code>unit1 setPos [100, 200, 0]</code></td></tr>
+  <tr><td><code>setDamage</code></td><td>设置伤害值(0-1)</td><td><code>unit1 setDamage 0.5</code></td></tr>
+  <tr><td><code>addWeapon</code></td><td>添加武器</td><td><code>player addWeapon "arifle_MX_F"</code></td></tr>
+  <tr><td><code>addMagazine</code></td><td>添加弹匣</td><td><code>player addMagazine "30Rnd_65x39_caseless_mag"</code></td></tr>
+  <tr><td><code>removeAllWeapons</code></td><td>移除所有武器</td><td><code>unit1 removeAllWeapons</code></td></tr>
+  <tr><td><code>setFace</code></td><td>设置脸型</td><td><code>unit1 setFace "WhiteHead_01"</code></td></tr>
+  <tr><td><code>alive</code></td><td>检查是否存活</td><td><code>if (alive unit1) then { ... }</code></td></tr>
+</table>
+
+<p><strong>创建士兵的完整写法：</strong></p>
+<pre><code><span class="kw">private</span> <span class="fn">_group</span> = <span class="fn">createGroup</span> <span class="fn">east</span>;       <span class="cmt">// east=俄军阵营</span>
+<span class="kw">private</span> <span class="fn">_soldier</span> = <span class="fn">_group</span> <span class="fn">createUnit</span> [
+    <span class="str">"O_Soldier_F"</span>,          <span class="cmt">// 士兵类型</span>
+    <span class="fn">getPos</span> <span class="fn">player</span>,            <span class="cmt">// 生成位置</span>
+    [],                        <span class="cmt">// 特殊标记（留空）</span>
+    <span class="num">0</span>,                         <span class="cmt">// 散开半径</span>
+    <span class="str">"NONE"</span>                     <span class="cmt">// 特殊属性</span>
+];</code></pre>
+
+<h3 id="ch3-2">任务系统</h3>
+<table>
+  <tr><th>命令</th><th>功能</th></tr>
+  <tr><td><code>player createSimpleTask ["任务名"]</code></td><td>创建一个简单任务</td></tr>
+  <tr><td><code>task1 setSimpleTaskDescription ["描述", "标题", "提示"]</code></td><td>设置任务描述</td></tr>
+  <tr><td><code>task1 setSimpleTaskDestination getPos obj1</code></td><td>在地图上标记任务目标</td></tr>
+  <tr><td><code>task1 setTaskState "SUCCEEDED"</code></td><td>标记任务成功（显示✔）</td></tr>
+  <tr><td><code>task1 setTaskState "FAILED"</code></td><td>标记任务失败（显示✘）</td></tr>
+  <tr><td><code>["TaskSucceeded", ["任务完成！"]] call BIS_fnc_showNotification</code></td><td>弹出任务完成通知</td></tr>
+</table>
+
+<h3 id="ch3-3">触发与提示</h3>
+<table>
+  <tr><th>命令</th><th>功能</th><th>效果</th></tr>
+  <tr><td><code>hint "文字"</code></td><td>屏幕中央大提示</td><td>显眼，会停留</td></tr>
+  <tr><td><code>systemChat "文字"</code></td><td>左下角聊天区提示</td><td>不打扰视野，适合调试</td></tr>
+  <tr><td><code>titleText ["文字", "PLAIN"]</code></td><td>屏幕底部字幕</td><td>电影感强，剧情用</td></tr>
+  <tr><td><code>hintSilent "文字"</code></td><td>静默提示（无提示音）</td><td>不打断玩家</td></tr>
+  <tr><td><code>sleep 秒数</code></td><td>暂停执行</td><td>不会卡住游戏</td></tr>
+  <tr><td><code>waitUntil {条件}</code></td><td>等待条件满足才继续</td><td>常用于触发器替代</td></tr>
+</table>
+
+<h3 id="ch3-4">标记点与音效</h3>
+<pre><code><span class="cmt">// 创建标记点</span>
+<span class="kw">private</span> <span class="fn">_marker</span> = <span class="fn">createMarker</span> [<span class="str">"marker_01"</span>, <span class="fn">getPos</span> <span class="fn">player</span>];
+<span class="fn">_marker</span> <span class="fn">setMarkerType</span> <span class="str">"hd_dot"</span>;        <span class="cmt">// 标记类型（点）</span>
+<span class="fn">_marker</span> <span class="fn">setMarkerColor</span> <span class="str">"ColorRed"</span>;      <span class="cmt">// 标记颜色</span>
+<span class="fn">_marker</span> <span class="fn">setMarkerText</span> <span class="str">"集合点"</span>;         <span class="cmt">// 标记文字</span>
+
+<span class="cmt">// 播放音效</span>
+<span class="fn">playSound3D</span> [<span class="str">"A3\Sounds_F\sfx\alarm.wss"</span>, <span class="fn">player</span>];  <span class="cmt">// 3D音效</span>
+<span class="fn">playMusic</span> <span class="str">"LeadTrack01_F"</span>;                        <span class="cmt">// 背景音乐</span></code></pre>
+
+<!-- ==================== 第四章 ==================== -->
+<h2 id="ch4">第四章 · 实战案例（从零到上手）</h2>
+<div class="tip">以下所有案例都可以直接复制到你的任务中运行。建议先通读一遍代码，然后逐个亲手敲一遍。</div>
+
+<h3 id="ch4-1">案例1：进游戏自动发提示消息</h3>
+<p><strong>难度：⭐</strong> &nbsp; <strong>学习重点：</strong>init.sqf 入口 + systemChat + hint</p>
+<p>创建 <code>init.sqf</code> 文件：</p>
+<pre><code><span class="cmt">// init.sqf —— 任务开始时自动执行</span>
+
+<span class="fn">systemChat</span> <span class="str">"========== 欢迎来到自定义任务 =========="</span>;
+<span class="fn">sleep</span> <span class="num">2</span>;  <span class="cmt">// 等2秒，让玩家先适应一下</span>
+
+<span class="fn">hint</span> <span class="fn">format</span> [
+    <span class="str">"你好，%1！\n任务目标：消灭所有敌人。\n祝你好运！"</span>,
+    <span class="fn">name</span> <span class="fn">player</span>
+];
+
+<span class="fn">sleep</span> <span class="num">5</span>;
+<span class="fn">systemChat</span> <span class="str">"提示：打开地图 (M) 查看任务标记。"</span>;</code></pre>
+
+<h3 id="ch4-2">案例2：玩家走到区域触发剧情对话</h3>
+<p><strong>难度：⭐⭐</strong> &nbsp; <strong>学习重点：</strong>waitUntil + 触发器替代 + 字幕对话</p>
+<pre><code><span class="cmt">// 剧情触发区域（坐标来自 3DEN 编辑器中的触发器位置）</span>
+<span class="kw">private</span> <span class="fn">_triggerPos</span> = <span class="fn">getMarkerPos</span> <span class="str">"trigger_area"</span>;
+<span class="kw">private</span> <span class="fn">_triggerRadius</span> = <span class="num">20</span>;
+
+<span class="cmt">// 等待玩家进入区域</span>
+<span class="fn">systemChat</span> <span class="str">"前往地图上的标记点..."</span>;
+<span class="fn">waitUntil</span> {
+    <span class="fn">player</span> <span class="fn">distance</span> <span class="fn">_triggerPos</span> &lt; <span class="fn">_triggerRadius</span>
+};
+
+<span class="cmt">// 触发！播放剧情对话</span>
+<span class="fn">titleText</span> [<span class="str">"无线电响起..."</span>, <span class="str">"BLACK IN"</span>, <span class="num">2</span>];
+<span class="fn">sleep</span> <span class="num">2</span>;
+
+<span class="fn">systemChat</span> <span class="str">"指挥部：士兵，你已到达目标区域。"</span>;
+<span class="fn">sleep</span> <span class="num">3</span>;
+<span class="fn">systemChat</span> <span class="str">"指挥部：搜索该区域，找到情报文件。"</span>;
+<span class="fn">sleep</span> <span class="num">3</span>;
+<span class="fn">systemChat</span> <span class="str">"指挥部：完毕。"</span>;
+
+<span class="cmt">// 创建任务</span>
+<span class="kw">private</span> <span class="fn">_task</span> = <span class="fn">player</span> <span class="fn">createSimpleTask</span> [<span class="str">"findIntel"</span>];
+<span class="fn">_task</span> <span class="fn">setSimpleTaskDescription</span> [<span class="str">"在区域内搜索情报文件"</span>, <span class="str">"搜寻情报"</span>, <span class="str">""</span>];
+<span class="fn">_task</span> <span class="fn">setSimpleTaskDestination</span> <span class="fn">_triggerPos</span>;</code></pre>
+
+<h3 id="ch4-3">案例3：杀死指定敌人完成任务</h3>
+<p><strong>难度：⭐⭐</strong> &nbsp; <strong>学习重点：</strong>addEventHandler + 条件监测 + 任务系统</p>
+<p>在编辑器中给目标敌人起名 <code>targetOfficer</code>，然后在 <code>init.sqf</code> 中：</p>
+<pre><code><span class="cmt">// 创建消灭任务</span>
+<span class="kw">private</span> <span class="fn">_killTask</span> = <span class="fn">player</span> <span class="fn">createSimpleTask</span> [<span class="str">"killOfficer"</span>];
+<span class="fn">_killTask</span> <span class="fn">setSimpleTaskDescription</span> [
+    <span class="str">"消灭敌军指挥官 targetOfficer"</span>,
+    <span class="str">"刺杀指挥官"</span>,
+    <span class="str">"目标已标记"</span>
+];
+<span class="fn">_killTask</span> <span class="fn">setSimpleTaskDestination</span> <span class="fn">getPos</span> <span class="fn">targetOfficer</span>;
+
+<span class="cmt">// 监听目标死亡事件</span>
+<span class="fn">targetOfficer</span> <span class="fn">addEventHandler</span> [<span class="str">"Killed"</span>, {
+    <span class="kw">params</span> [<span class="str">"_unit"</span>];
+    
+    <span class="fn">_killTask</span> <span class="fn">setTaskState</span> <span class="str">"SUCCEEDED"</span>;
+    [<span class="str">"TaskSucceeded"</span>, [<span class="str">"指挥官已被消灭！"</span>]] <span class="kw">call</span> <span class="fn">BIS_fnc_showNotification</span>;
+    <span class="fn">systemChat</span> <span class="str">"✅ 任务完成：敌军指挥官已被击毙。"</span>;
+}];</code></pre>
+
+<h3 id="ch4-4">案例4：创建随机巡逻队</h3>
+<p><strong>难度：⭐⭐⭐</strong> &nbsp; <strong>学习重点：</strong>循环 + 随机位置 + 创建单位 + 路径点</p>
+<pre><code><span class="cmt">// 生成随机巡逻队函数</span>
+<span class="fn">my_fnc_spawnPatrol</span> = {
+    <span class="kw">params</span> [<span class="str">"_center"</span>, <span class="str">"_radius"</span>, <span class="str">"_count"</span>];
+    
+    <span class="kw">private</span> <span class="fn">_group</span> = <span class="fn">createGroup</span> <span class="fn">east</span>;
+    
+    <span class="cmt">// 创建巡逻队成员</span>
+    <span class="kw">for</span> <span class="str">"_i"</span> <span class="kw">from</span> <span class="num">1</span> <span class="kw">to</span> <span class="fn">_count</span> <span class="kw">do</span> {
+        <span class="kw">private</span> <span class="fn">_pos</span> = <span class="fn">_center</span> <span class="fn">getPos</span> [<span class="fn">random</span> <span class="fn">_radius</span>, <span class="fn">random</span> <span class="num">360</span>];
+        <span class="fn">_group</span> <span class="fn">createUnit</span> [<span class="str">"O_Soldier_F"</span>, <span class="fn">_pos</span>, [], <span class="num">0</span>, <span class="str">"NONE"</span>];
+    };
+    
+    <span class="cmt">// 添加巡逻路径点（随机走几个点）</span>
+    <span class="kw">for</span> <span class="str">"_i"</span> <span class="kw">from</span> <span class="num">1</span> <span class="kw">to</span> <span class="num">3</span> <span class="kw">do</span> {
+        <span class="kw">private</span> <span class="fn">_wpPos</span> = <span class="fn">_center</span> <span class="fn">getPos</span> [<span class="fn">random</span> <span class="fn">_radius</span>, <span class="fn">random</span> <span class="num">360</span>];
+        <span class="kw">private</span> <span class="fn">_wp</span> = <span class="fn">_group</span> <span class="fn">addWaypoint</span> [<span class="fn">_wpPos</span>, <span class="num">0</span>];
+        <span class="fn">_wp</span> <span class="fn">setWaypointType</span> <span class="str">"MOVE"</span>;
+        <span class="fn">_wp</span> <span class="fn">setWaypointBehaviour</span> <span class="str">"SAFE"</span>;
+        <span class="fn">_wp</span> <span class="fn">setWaypointSpeed</span> <span class="str">"LIMITED"</span>;
+    };
+    
+    <span class="cmt">// 最后一个路点设为循环</span>
+    <span class="kw">private</span> <span class="fn">_lastWP</span> = <span class="fn">_group</span> <span class="fn">addWaypoint</span> [<span class="fn">_center</span>, <span class="num">0</span>];
+    <span class="fn">_lastWP</span> <span class="fn">setWaypointType</span> <span class="str">"CYCLE"</span>;
+    
+    <span class="fn">systemChat</span> <span class="fn">format</span> [<span class="str">"一支 %1 人巡逻队已出动"</span>, <span class="fn">_count</span>];
+};
+
+<span class="cmt">// 生成3支巡逻队</span>
+[<span class="fn">getPos</span> <span class="fn">player</span>, <span class="num">200</span>, <span class="num">4</span>] <span class="kw">call</span> <span class="fn">my_fnc_spawnPatrol</span>;
+[<span class="fn">getPos</span> <span class="fn">player</span>, <span class="num">200</span>, <span class="num">3</span>] <span class="kw">call</span> <span class="fn">my_fnc_spawnPatrol</span>;
+[<span class="fn">getPos</span> <span class="fn">player</span>, <span class="num">200</span>, <span class="num">5</span>] <span class="kw">call</span> <span class="fn">my_fnc_spawnPatrol</span>;</code></pre>
+
+<h3 id="ch4-5">案例5：复活系统（Respawn with Loadout）</h3>
+<p><strong>难度：⭐⭐⭐</strong> &nbsp; <strong>学习重点：</strong>description.ext + onPlayerRespawn + 装备保存</p>
+<p><strong>第一步：</strong>创建 <code>description.ext</code>：</p>
+<pre><code><span class="cmt">// description.ext</span>
+<span class="fn">respawn</span> = <span class="str">"BASE"</span>;                  <span class="cmt">// 基地复活模式</span>
+<span class="fn">respawnDelay</span> = <span class="num">5</span>;                 <span class="cmt">// 复活等待时间（秒）</span>
+<span class="fn">respawnOnStart</span> = <span class="num">1</span>;               <span class="cmt">// 游戏开始就标记复活点（-1=关）</span></code></pre>
+
+<p><strong>第二步：</strong>创建 <code>onPlayerRespawn.sqf</code>（保存装备并在复活后恢复）：</p>
+<pre><code><span class="cmt">// onPlayerRespawn.sqf —— 玩家复活时自动执行</span>
+<span class="kw">params</span> [<span class="str">"_unit"</span>, <span class="str">"_corpse"</span>];
+
+<span class="cmt">// 从尸体上找回装备</span>
+<span class="kw">private</span> <span class="fn">_loadout</span> = <span class="fn">getUnitLoadout</span> <span class="fn">_corpse</span>;
+<span class="fn">_unit</span> <span class="fn">setUnitLoadout</span> <span class="fn">_loadout</span>;
+
+<span class="fn">systemChat</span> <span class="str">"你已经复活，装备已恢复。"</span>;
+<span class="fn">hint</span> <span class="str">"重新投入战斗！"</span>;</code></pre>
+
+<h3 id="ch4-6">案例6：动态天气与时间系统</h3>
+<p><strong>难度：⭐⭐</strong> &nbsp; <strong>学习重点：</strong>天气命令 + 时间推移 + 循环脚本</p>
+<pre><code><span class="cmt">// 在 init.sqf 中启动</span>
+[] <span class="kw">spawn</span> {
+    <span class="cmt">// 随机初始天气</span>
+    <span class="kw">private</span> <span class="fn">_overcast</span> = <span class="fn">random</span> <span class="num">1</span>;         <span class="cmt">// 云量 0(晴)-1(阴)</span>
+    <span class="kw">private</span> <span class="fn">_fog</span> = <span class="fn">random</span> <span class="num">0.3</span>;            <span class="cmt">// 雾量</span>
+    <span class="kw">private</span> <span class="fn">_rain</span> = <span class="fn">random</span> <span class="num">0.5</span>;           <span class="cmt">// 雨量</span>
+    
+    <span class="num">300</span> <span class="fn">setOvercast</span> <span class="fn">_overcast</span>;          <span class="cmt">// 300秒内过渡到设定云量</span>
+    <span class="num">60</span> <span class="fn">setFog</span> <span class="fn">_fog</span>;                      <span class="cmt">// 雾过渡</span>
+    <span class="num">60</span> <span class="fn">setRain</span> <span class="fn">_rain</span>;                    <span class="cmt">// 雨过渡</span>
+    
+    <span class="cmt">// 时间设为黄昏（18:00）</span>
+    <span class="fn">skipTime</span> (<span class="num">18</span> - <span class="fn">daytime</span>);
+    
+    <span class="fn">systemChat</span> <span class="fn">format</span> [
+        <span class="str">"天气：云量%1 雾量%2 雨量%3 | 时间：18:00"</span>,
+        <span class="fn">_overcast</span>, <span class="fn">_fog</span>, <span class="fn">_rain</span>
+    ];
+    
+    <span class="cmt">// 循环：每5分钟随机微调天气（模拟动态变化）</span>
+    <span class="kw">while</span> {<span class="kw">true</span>} <span class="kw">do</span> {
+        <span class="fn">sleep</span> <span class="num">300</span>;  <span class="cmt">// 5分钟 = 300秒</span>
+        <span class="kw">private</span> <span class="fn">_change</span> = (<span class="fn">random</span> <span class="num">0.2</span>) - <span class="num">0.1</span>;  <span class="cmt">// -0.1 到 +0.1 随机变化</span>
+        <span class="fn">_overcast</span> = (<span class="fn">_overcast</span> + <span class="fn">_change</span>) <span class="fn">max</span> <span class="num">0</span> <span class="fn">min</span> <span class="num">1</span>;  <span class="cmt">// 限制在 0-1 之间</span>
+        <span class="num">120</span> <span class="fn">setOvercast</span> <span class="fn">_overcast</span>;
+        <span class="fn">systemChat</span> <span class="str">"天气在变化..."</span>;
+    };
+};</code></pre>
+
+<!-- ==================== 第五章 ==================== -->
+<h2 id="ch5">第五章 · 调试与排错</h2>
+<div class="warn">写代码一定会出错。能快速定位和修复错误，才是真正会写脚本的标志。本章教你必备的调试技能。</div>
+
+<h3 id="ch5-1">调试工具</h3>
+<table>
+  <tr><th>方法</th><th>用法</th><th>适用场景</th></tr>
+  <tr><td><code>systemChat</code></td><td>在聊天区输出变量值</td><td>快速检查变量对不对</td></tr>
+  <tr><td><code>diag_log</code></td><td>输出到日志文件</td><td>正式调试，不干扰游戏画面</td></tr>
+  <tr><td><code>hint str</code></td><td>弹出提示框显示变量</td><td>需要立即看到结果</td></tr>
+  <tr><td>Debug Console</td><td>游戏内按 Esc → Debug Console</td><td>实时执行代码、查看变量</td></tr>
+</table>
+
+<pre><code><span class="cmt">// 调试示例：检查变量值</span>
+<span class="kw">private</span> <span class="fn">_myVar</span> = <span class="num">42</span>;
+
+<span class="fn">systemChat</span> <span class="fn">format</span> [<span class="str">"[DEBUG] _myVar = %1"</span>, <span class="fn">_myVar</span>];
+<span class="fn">diag_log</span> <span class="fn">format</span> [<span class="str">"[DEBUG] player position = %1"</span>, <span class="fn">getPos</span> <span class="fn">player</span>];
+<span class="fn">hint</span> <span class="fn">format</span> [<span class="str">"[DEBUG] enemy alive: %1"</span>, <span class="fn">alive</span> <span class="fn">targetOfficer</span>];</code></pre>
+<div class="note">日志文件位置：<code>%localappdata%\Arma 3\*.rpt</code> — 这里记录了游戏运行期间的所有输出。</div>
+
+<h3 id="ch5-2">常见报错解读</h3>
+<table>
+  <tr><th>报错信息</th><th>含义</th><th>常见原因</th></tr>
+  <tr><td><code>Undefined variable</code></td><td>变量未定义</td><td>拼写错误、忘记声明、作用域问题</td></tr>
+  <tr><td><code>Type String, expected Number</code></td><td>类型不匹配</td><td>把字符串当数字用了（如 "5" + 3）</td></tr>
+  <tr><td><code>Generic error in expression</code></td><td>表达式语法错误</td><td>括号不匹配、少分号、命令拼错</td></tr>
+  <tr><td><code>Error Zero Divisor</code></td><td>除以零</td><td>除数变量为 0</td></tr>
+  <tr><td><code>Missing ;</code></td><td>缺少分号</td><td>语句末尾忘了加分号 <code>;</code></td></tr>
+</table>
+
+<h3 id="ch5-3">启动参数</h3>
+<p>在 Steam 中右键 Arma 3 → 「属性」→ 「启动选项」，添加以下参数：</p>
+<table>
+  <tr><th>参数</th><th>作用</th></tr>
+  <tr><td><code>-showScriptErrors</code></td><td>在屏幕上显示脚本错误（强烈推荐！）</td></tr>
+  <tr><td><code>-debug</code></td><td>开启调试模式</td></tr>
+  <tr><td><code>-noLogs</code></td><td>关闭日志（不要加这个）</td></tr>
+  <tr><td><code>-filePatching</code></td><td>允许直接加载未打包文件（开发必备）</td></tr>
+</table>
+<div class="tip">推荐启动参数：<code>-showScriptErrors -filePatching</code>，开发过程中始终开着。</div>
+
+<h3 id="ch5-4">善用官方 Wiki</h3>
+<p>Arma 3 官方 Wiki 是脚本开发者的"圣经"：<strong>community.bistudio.com</strong></p>
+<p>每一个命令、每一个函数都有详细的文档页面，包含参数说明、返回值、使用示例。</p>
+<div class="tip">养成习惯：遇到不认识的命令，直接在 Google 搜 "<code>arma 3 命令名</code>"，第一条结果通常是官方 Wiki。</div>
+
+<h3 id="ch5-5">多人联机调试注意事项</h3>
+<ul>
+  <li>客户端脚本（如 initPlayerLocal.sqf）只在玩家自己的电脑上运行</li>
+  <li>服务器脚本在服务器上运行，所有玩家都能看到效果</li>
+  <li>使用 <code>isServer</code> 判断当前是否在服务器上执行</li>
+  <li>使用 <code>remoteExec</code> 在服务器上远程执行命令</li>
+</ul>
+
+<!-- ==================== 第六章 ==================== -->
+<h2 id="ch6">第六章 · 进阶学习路径</h2>
+
+<h3 id="ch6-1">Event Handlers（事件处理器）</h3>
+<p>Event Handler 是让脚本"监听"游戏事件的机制——当某件事发生时自动触发你的代码。</p>
+<pre><code><span class="cmt">// 监听玩家被击中</span>
+<span class="fn">player</span> <span class="fn">addEventHandler</span> [<span class="str">"Hit"</span>, {
+    <span class="kw">params</span> [<span class="str">"_unit"</span>, <span class="str">"_source"</span>, <span class="str">"_damage"</span>];
+    <span class="fn">systemChat</span> <span class="fn">format</span> [<span class="str">"你受到了 %1 点伤害！"</span>, <span class="fn">_damage</span>];
+}];
+
+<span class="cmt">// 常用事件：Killed / Hit / Fired / GetIn / GetOut / Respawn / HandleDamage</span></code></pre>
+
+<h3 id="ch6-2">多人联机脚本要点</h3>
+<p>在多人游戏中，脚本运行位置至关重要。核心概念：</p>
+<ul>
+  <li><strong>Locality（本地性）</strong>：每个对象只存在于一台机器上。玩家在自己电脑上、AI 在服务器上</li>
+  <li><strong>remoteExec</strong>：在指定机器上远程执行代码</li>
+  <li><strong>publicVariable</strong>：将变量同步到所有客户端</li>
+  <li><strong>initPlayerLocal.sqf</strong> vs <strong>initServer.sqf</strong>：分别在本机和服务器执行</li>
+</ul>
+<div class="warn">多人脚本是 Arma 脚本开发中最复杂的部分。建议先把单机脚本练熟，再逐步接触多人联机内容。</div>
+
+<h3 id="ch6-3">推荐的学习资源</h3>
+<table>
+  <tr><th>资源</th><th>地址/方式</th><th>说明</th></tr>
+  <tr><td>BI 官方 Wiki</td><td>community.bistudio.com</td><td>最权威的参考资料</td></tr>
+  <tr><td>Arma 3 Discord</td><td>discord.gg/arma</td><td>社区交流、提问</td></tr>
+  <tr><td>Reddit</td><td>r/armadev</td><td>开发者社区</td></tr>
+  <tr><td>B站教程</td><td>搜索"Arma3 脚本"或"Arma3 SQF"</td><td>中文视频教程</td></tr>
+  <tr><td>Killzone Kid 博客</td><td>killzonekid.com</td><td>经典 Arma 脚本博客</td></tr>
+  <tr><td>GitHub</td><td>搜索 Arma 3 mission examples</td><td>学习别人的任务源码</td></tr>
+</table>
+
+<h3 id="ch6-4">推荐的经典模组源码学习</h3>
+<p>拆读其他人的源码是快速进步的最佳方式。以下是一些适合初学者研究的模组：</p>
+<ul>
+  <li><strong>Simple Vehicle Respawn</strong>：载具复活系统，代码简洁易懂</li>
+  <li><strong>VCOM AI</strong>：AI 行为增强，学习 AI 控制的好材料</li>
+  <li><strong>ALiVE</strong>：大型动态战场框架（进阶，但架构值得学习）</li>
+  <li><strong>BI 官方任务</strong>：游戏自带的单人/多人任务，源码在游戏目录中可直接查看</li>
+</ul>
+
+<!-- ==================== 附录 ==================== -->
+<h2 id="appendix">附录</h2>
+
+<h3 id="ap-a">附录 A：常用按键与快捷键</h3>
+<table>
+  <tr><th>按键</th><th>功能</th></tr>
+  <tr><td><code>Esc</code></td><td>打开菜单 → 左下角 "Debug Console" 打开调试控制台</td></tr>
+  <tr><td><code>M</code></td><td>打开地图，查看标记点和任务</td></tr>
+  <tr><td><code>J</code></td><td>查看当前任务列表</td></tr>
+  <tr><td><code>/</code></td><td>打开聊天输入框（测试 systemChat 相关命令）</td></tr>
+  <tr><td><code>Ctrl + Shift + F10</code></td><td>3DEN 编辑器中：预览任务（直接测试你的脚本）</td></tr>
+</table>
+
+<h3 id="ap-b">附录 B：常用 Class Name 速查</h3>
+<p><strong>Class Name</strong> 是游戏中物品/单位/载具的唯一标识符。在脚本中创建东西时必须使用正确的 Class Name。</p>
+<table>
+  <tr><th>类别</th><th>Class Name</th><th>说明</th></tr>
+  <tr><td>北约步枪兵</td><td><code>B_Soldier_F</code></td><td>基础步兵</td></tr>
+  <tr><td>俄军步枪兵</td><td><code>O_Soldier_F</code></td><td>基础步兵</td></tr>
+  <tr><td>独立军步枪兵</td><td><code>I_Soldier_F</code></td><td>基础步兵</td></tr>
+  <tr><td>北约 MX 步枪</td><td><code>arifle_MX_F</code></td><td>基础突击步枪</td></tr>
+  <tr><td>北约 MX 弹匣</td><td><code>30Rnd_65x39_caseless_mag</code></td><td>标准弹匣</td></tr>
+  <tr><td>手雷</td><td><code>HandGrenade</code></td><td>破片手雷</td></tr>
+  <tr><td>烟雾弹</td><td><code>SmokeShell</code></td><td>彩色烟雾</td></tr>
+  <tr><td>北约猎手 MRAP</td><td><code>B_MRAP_01_F</code></td><td>轻型装甲车</td></tr>
+  <tr><td>俄军直升机</td><td><code>O_Heli_Light_02_F</code></td><td>运输直升机</td></tr>
+  <tr><td>医疗包</td><td><code>FirstAidKit</code></td><td>急救用品</td></tr>
+</table>
+<div class="tip">完整 Class Name 列表请查阅官方 Wiki：<strong>community.bistudio.com/wiki/Arma_3_Assets</strong></div>
+
+<h3 id="ap-c">附录 C：常见问题 FAQ</h3>
+
+<p><strong>Q：init.sqf 不执行怎么办？</strong><br>
+A：检查文件名是否拼写正确（大小写敏感）、文件编码是否为 UTF-8 without BOM、文件是否放在任务文件夹根目录。</p>
+
+<p><strong>Q：为什么脚本里的中文显示乱码？</strong><br>
+A：确保 .sqf 文件保存为 <strong>UTF-8 without BOM</strong> 编码。在 VS Code 右下角可以查看和修改编码。</p>
+
+<p><strong>Q：如何在游戏中实时测试单行代码？</strong><br>
+A：按 Esc → 点击左下角 "Debug Console" → 在输入框中输入代码 → 点击 "LOCAL EXEC" 或 "SERVER EXEC"。</p>
+
+<p><strong>Q：sleep 命令为什么不生效？</strong><br>
+A：sleep 只能在 <strong>spawn</strong> 或 <strong>execVM</strong> 创建的子线程中使用，不能直接在 init.sqf 的主线中用（除非 init.sqf 本身是用 spawn 调用的）。</p>
+
+<p><strong>Q：脚本中的 == 和 = 有什么区别？</strong><br>
+A：<code>==</code> 是<strong>比较</strong>（判断是否相等），<code>=</code> 是<strong>赋值</strong>（把右边的值存到左边变量）。这个区别一定要记牢！</p>
+
+<p><strong>Q：如何知道一个命令的具体用法？</strong><br>
+A：最快的方法：Google 搜索 <code>arma 3 命令名</code>，第一条结果通常是 BI Wiki 的文档页面，有完整参数说明和代码示例。</p>
+
+<p><strong>Q：写脚本容易卡住或崩溃怎么办？</strong><br>
+A：检查是否有无限循环（while 里忘了写 sleep）、是否在短时间内生成太多单位、是否有无限递归调用。</p>
+
+<hr style="margin: 40px 0 20px; border-color: var(--border);">
+
+<p style="text-align: center; color: #666; font-size: .85em;">
+  <strong>— 本手册到此结束，祝你在 Arma 3 脚本开发的世界中玩得开心！ —</strong><br>
+  <small>记住：写代码 = 复制 + 修改 + 测试 + 查 Wiki，没人能一次写对。多练就熟了。</small>
+</p>
+
+</main>
+
+<script>
+// Highlight active TOC item on scroll
+const sections = document.querySelectorAll('h2[id], h3[id]');
+const links = document.querySelectorAll('nav a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+  links.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + current); });
+});
+</script>
+
+</body>
+</html>
